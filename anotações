@@ -1,0 +1,9 @@
+menu  
+    registrar paciente
+    avaliar paciente (criterio de urgencia)
+    passar para o medico (onde vai ser encerrado o paciente na lista)
+    lista de paciente ativos
+    historico de pacientes que foram no dia  que pode exportar o documento 
+
+    fazer validações 
+
