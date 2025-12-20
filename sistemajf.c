@@ -29,7 +29,8 @@ typedef struct dados_pessoais{
 
 typedef struct dados_medicos{
     char sintomas[150];
-    char nivel; 
+    int nivel;
+    int registrado; //garantir q n repita  , =0 não atendido , =1 atendido
 }medico; 
 
 //prototipos das funções 
@@ -37,6 +38,8 @@ void menu();
 int cadastroPaciente(int atual,pessoal pacientes[],int *pA); 
 void preencherEndereco(endereco *end);
 void enter(); 
+void cor(int cor_letra); 
+void saudePaciente(int atual,pessoal pacientes[], medico paciente[]); 
 
 int main(){
     setlocale(LC_ALL,"portuguese"); 
@@ -50,6 +53,7 @@ void menu(){
     int pacientesR=0; //contador de pacientes registrados
     int pacientesA=0; //contador de pacientes ativos   
     pessoal pacientes[pessoa];
+    medico prontuario[pessoa]={0}; //zerando tudo da struct
     do{
         while(!kbhit()){ //esquema do relogio e data , e o loop roda enquanto nenhuma tecla for teclada
             system("cls"); 
@@ -92,7 +96,7 @@ void menu(){
         switch(esc){
             case '1':   pacientesR=cadastroPaciente(pacientesR,pacientes,&pacientesA);  
             break;
-            case '2':
+            case '2':   saudePaciente(pacientesR,pacientes,prontuario); 
             break; 
             case '3':
             break;
@@ -108,6 +112,11 @@ void menu(){
     return; 
 }
 
+void cor(int cor_letra){
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE); 
+    SetConsoleTextAttribute(hConsole, cor_letra);      
+}
+
 int cadastroPaciente(int atual,pessoal pacientes[],int *pA){ //quando fizer vetor de struct , declare um ponteiro para manipular 
     pessoal *p=&pacientes[atual]; //um ponteiro que pegou o endereço do paciente na posição 'atual' e vai manipular , indicando onde vai cada parte da struct
     // o ponteiro pega a variavel pacientes atual e manipula ele 
@@ -120,7 +129,7 @@ int cadastroPaciente(int atual,pessoal pacientes[],int *pA){ //quando fizer veto
     puts("  Qual é o nome do paciente?");
     printf("  ---> ");
     fgets(p->nome,tam,stdin); 
-    p->nome[strcspn(p->nome,"\0")]=0; //retirando o enter 
+    p->nome[strcspn(p->nome,"\n")]=0; //retirando o enter 
     puts("  Qual é a idade do paciente?"); 
     printf("  ---> ");
     scanf("%d",&p->idade);
@@ -128,11 +137,11 @@ int cadastroPaciente(int atual,pessoal pacientes[],int *pA){ //quando fizer veto
     puts("  Qual é o CPF do paciente?");
     printf("  ---> ");
     fgets(p->cpf,tam,stdin);
-    p->cpf[strcspn(p->cpf,"\0")]=0; //retirando o enter
+    p->cpf[strcspn(p->cpf,"\n")]=0; //retirando o enter
     puts(   "Qual é o telefone do paciente?");
     printf("  ---> ");
     fgets(p->telefone,tam,stdin); 
-    p->telefone[strcspn(p->telefone,"\0")]=0; //retirando o enter
+    p->telefone[strcspn(p->telefone,"\n")]=0; //retirando o enter
     puts(""); 
     preencherEndereco(&p->localizacao); // essa função vai pegar o endereço da variavel struct localização e passar pra funçõa responsavel pro preencher essa parte
     *pA+=1; //vai somar +1 no total de pacientes ativos 
@@ -180,3 +189,52 @@ void enter(){
     getch(); 
 }
 
+void saudePaciente(int atual,pessoal pacientes[], medico paciente[]){
+    medico *m; //ponteiro para pegar o endereço do struct medico e manipular dps
+    int i; 
+    int escolhido, escolhidoC; 
+    system("cls"); 
+    if(atual==0){
+        puts("Nenhum paciente ativo!"); 
+        enter(); 
+    }else{
+        for(i=0;i<atual;i++){
+                pessoal *p=&pacientes[i]; //ponteiro que vai pegar o endereço da struct pessoal e manipular //so botar o nome //dado da struct
+                //o ponteiro vai acessar o conteudo da struct em tal i
+                printf("Nº%d\n",i+1); 
+                printf("Nome: %s\n",p->nome);
+                printf("CPF: %s\n",p->cpf); 
+                puts("+------------------------+");
+        }
+        puts(""); 
+        puts("Qual paciente vai ter a saúde analisada?");
+        scanf("%d",&escolhido);
+        getchar(); 
+        escolhidoC=escolhido-1; 
+        system("cls"); 
+        m=&paciente[escolhidoC];
+        if(m->registrado==0){
+            puts("Quais são os sintomas do paciente?");
+            fgets(m->sintomas,150,stdin); 
+            m->sintomas[strcspn(m->sintomas,"\n")]=0; //tirando o enter 
+            puts("Qual estado saúde do paciente?");
+            cor(10); 
+            printf("1-ESTÁVEL  "); 
+            cor(14);
+            printf("2-ATENÇÃO  ");
+            cor(12);
+            printf("3-GRAVE  \n"); 
+            cor(7); 
+            do{
+                scanf("%d",&m->nivel); 
+                getchar();
+            }while(m->nivel!=1 && m->nivel!=2 && m->nivel!=3);
+            m->registrado=1;
+            enter(); 
+        }else{
+            puts("Esse paciente já foi registrado!");
+            enter();
+        }
+    }
+        return; 
+}
