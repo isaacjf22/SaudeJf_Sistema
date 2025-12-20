@@ -1,23 +1,19 @@
 #include <stdio.h>
+#include <windows.h> // Precisa dessa biblioteca!
 
-int main(){
-    printf("  _   _            _ _   _     \n");
-        printf(" | | | |          | | | | |    \n");
-        printf(" | |_| | ___  __ _| | |_| |__  \n");
-        printf(" |  _  |/ _ \\/ _` | | __| '_ \\ \n");
-        printf(" | | | |  __/ (_| | | |_| | | |\n");
-        printf(" \\_| |_/\\___|\\__,_|_|\\__|_| |_|\n");
-        printf("                       _ ______\n");
-        printf("                      | |  ____|\n");
-        printf("                   _  | | |__   \n");
-        printf("                  | | | |  __|  \n");
-        printf("                  | |_| | |     \n");
-        printf("                   \\___/|_|     \n");
-        printf("+---------------------------------+\n"); 
-        printf("        SISTEMA HOSPITALAR         \n");
-        printf("+---------------------------------+\n"); 
+int main() {
+   // PRIMEIRO SOM (O "Dimm")
+    // 750 é a frequência (meio agudo)
+    // 500 é o tempo (meio segundo)
+    Beep(750, 500); 
     
-    
-    
-    return 0; 
+    // Pequena pausa dramática
+    Sleep(100); 
+
+    // SEGUNDO SOM (O "Dommm")
+    // 550 é a frequência (mais grave, tom de encerramento)
+    // 800 é o tempo (dura um pouquinho mais)
+    Beep(550, 800);
+    return 0;
 }
+    

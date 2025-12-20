@@ -41,7 +41,8 @@ void preencherEndereco(endereco *end);
 void enter(); 
 void cor(int cor_letra); 
 void saudePaciente(int atual,pessoal pacientes[], medico paciente[]); 
-void listarAtivos(int ativo, int atual, pessoal ap[], medico bp[]); 
+void atenderAtivos(int ativo, int atual, pessoal ap[], medico bp[]); 
+void chamadaPaciente(char nome[], int nivel); 
 
 int main(){
     setlocale(LC_ALL,"portuguese"); 
@@ -85,31 +86,28 @@ void menu(){
             puts(""); 
             printf("    1-Registar dados de paciente\n"); 
             printf("    2-Registar saúde de paciente\n"); 
-            printf("    3-Realizar atendimento\n"); 
-            printf("    4-Listar pacientes ativos\n"); 
-            printf("    5-Histórico de pacientes\n"); 
-            printf("    6-Sair do sistema\n");  
+            printf("    3-Realizar atendimento\n");  
+            printf("    4-Histórico de pacientes\n"); 
+            printf("    5-Sair do sistema\n");  
             puts(""); 
             Sleep(1000); //nao sobrecarregar a maquina
         }  
         do{ //validação
             esc=getch(); //pegando a opção 
-        }while(esc!='1' && esc!='2' && esc!='3' && esc!='4' && esc!='5' && esc!='6'); 
+        }while(esc!='1' && esc!='2' && esc!='3' && esc!='4' && esc!='5'); 
         switch(esc){
             case '1':   pacientesR=cadastroPaciente(pacientesR,pacientes,&pacientesA);  
             break;
             case '2':   saudePaciente(pacientesR,pacientes,prontuario); 
             break; 
-            case '3':
+            case '3':   atenderAtivos(pacientesA,pacientesR,pacientes,prontuario);
             break;
-            case '4':   listarAtivos(pacientesA,pacientesR,pacientes,prontuario); 
-            break;
-            case '5':
+            case '4':
             break; 
-            case '6': puts("Saindo do sistema...");
+            case '5':   puts("Saindo do sistema...");
             break; 
         }
-    }while(esc!='6');
+    }while(esc!='5');
 
     return; 
 }
@@ -242,11 +240,14 @@ void saudePaciente(int atual,pessoal pacientes[], medico paciente[]){
     return; 
 }
 
-void listarAtivos(int ativo, int atual, pessoal ap[], medico bp[]){
+void atenderAtivos(int ativo, int atual, pessoal ap[], medico bp[]){
     pessoal *a; //declaro a variavel 
     medico *b; 
     int grave=1,atencao=1,estavel=1; 
-    int i; 
+    int cont=1; //vai ajudar para pegar o paciente escolhido 
+    int i;
+    int escnivel, escpessoa; //escolha para quem vai ser atendido 
+    int achou=0; //verificar se achou ou não o desejado 
     system("cls"); 
     if(atual==0){
         puts("Nenhum paciente ativo!"); 
@@ -266,7 +267,7 @@ void listarAtivos(int ativo, int atual, pessoal ap[], medico bp[]){
                 printf("CPF: %s\n",a->cpf); 
                 printf("Sintomas: %s\n",b->sintomas); 
                 puts("+---------------------------+");
-                grave++; 
+                grave++;
             }
         }
         puts("");
@@ -302,7 +303,77 @@ void listarAtivos(int ativo, int atual, pessoal ap[], medico bp[]){
             }
         }
         puts("");
+        puts("Qual o nível e número do paciente você quer realizar o atendimento?");
+        cor(10); 
+        printf("1-ESTÁVEL  "); 
+        cor(14);
+        printf("2-ATENÇÃO  ");
+        cor(12);
+        printf("3-GRAVE \n"); 
+        cor(7); 
+        scanf("%d %d",&escnivel,&escpessoa); 
+        getchar(); 
+        for(i=0;i<atual;i++){ //loop para procura do paciente desejado 
+            a=&ap[i]; //apontando o endereço pros ponteiros indicando oq eles vao mexer
+            b=&bp[i];
+            if(a->ativo==1 && b->nivel==escnivel){
+                if(escpessoa==cont){
+                    chamadaPaciente(a->nome,b->nivel); 
+                    a->ativo=0;
+                    achou=1; 
+                    break; //sair do loop de procura 
+                }
+            cont++;  //vai aumentar no mesmo jeito q o grave,atenção e estavel no primeiro loop 
+            }
+        }
+        if(achou==0){
+            puts("Paciente não encontrado!");
+            puts(""); 
+        }
         enter(); 
     }
     return; 
 }
+
+void chamadaPaciente(char nome[], int nivel){
+    int i; 
+    if(nivel==1){
+        for(i=0;i<3;i++){
+            system("cls"); 
+            cor(10); 
+            printf("ESTÁVEL\n"); 
+            cor(07);
+            printf(">>%s<<\n",nome);
+            Beep(750,500); //chamada de som
+            Sleep(100); 
+            Beep(550,800);
+            Sleep(3000); 
+        }
+    }else if(nivel==2){
+        for(i=0;i<3;i++){
+            system("cls"); 
+            cor(14); 
+            printf("ATENÇÃO\n"); 
+            cor(07);
+            printf(">>%s<<\n",nome);
+            Beep(750,500); //chamada de som
+            Sleep(100); 
+            Beep(550,800); 
+            Sleep(3000); 
+        }
+    }else{
+        for(i=0;i<3;i++){
+            system("cls"); 
+            cor(12); 
+            printf("GRAVE\n"); 
+            cor(07);
+            printf(">>%s<<\n",nome);
+            Beep(750,500); //chamada de som
+            Sleep(100); 
+            Beep(550,800); 
+            Sleep(3000); 
+        }
+    }
+    return; 
+}
+
