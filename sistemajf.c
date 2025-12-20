@@ -41,8 +41,10 @@ void preencherEndereco(endereco *end);
 void enter(); 
 void cor(int cor_letra); 
 void saudePaciente(int atual,pessoal pacientes[], medico paciente[]); 
-void atenderAtivos(int ativo, int atual, pessoal ap[], medico bp[]); 
+int atenderAtivos(int ativo, int atual, pessoal ap[], medico bp[]); 
 void chamadaPaciente(char nome[], int nivel); 
+void historicoPacientes(int atual,pessoal pacientes[], medico paciente[]);
+void exportarHistorico(int atual,pessoal pacientes[], medico paciente[]);
 
 int main(){
     setlocale(LC_ALL,"portuguese"); 
@@ -88,26 +90,29 @@ void menu(){
             printf("    2-Registar saúde de paciente\n"); 
             printf("    3-Realizar atendimento\n");  
             printf("    4-Histórico de pacientes\n"); 
-            printf("    5-Sair do sistema\n");  
+            printf("    5-Exportar histórico\n"); 
+            printf("    6-Sair do sistema\n");  
             puts(""); 
             Sleep(1000); //nao sobrecarregar a maquina
         }  
         do{ //validação
             esc=getch(); //pegando a opção 
-        }while(esc!='1' && esc!='2' && esc!='3' && esc!='4' && esc!='5'); 
+        }while(esc!='1' && esc!='2' && esc!='3' && esc!='4' && esc!='5' && esc!='6'); 
         switch(esc){
             case '1':   pacientesR=cadastroPaciente(pacientesR,pacientes,&pacientesA);  
             break;
             case '2':   saudePaciente(pacientesR,pacientes,prontuario); 
             break; 
-            case '3':   atenderAtivos(pacientesA,pacientesR,pacientes,prontuario);
+            case '3':   pacientesA=atenderAtivos(pacientesA,pacientesR,pacientes,prontuario);
             break;
-            case '4':
+            case '4':   historicoPacientes(pacientesR,pacientes,prontuario); 
             break; 
-            case '5':   puts("Saindo do sistema...");
+            case '5':   exportarHistorico(pacientesR,pacientes,prontuario);
+            break;
+            case '6':   puts("Saindo do sistema...");
             break; 
         }
-    }while(esc!='5');
+    }while(esc!='6');
 
     return; 
 }
@@ -240,7 +245,7 @@ void saudePaciente(int atual,pessoal pacientes[], medico paciente[]){
     return; 
 }
 
-void atenderAtivos(int ativo, int atual, pessoal ap[], medico bp[]){
+int atenderAtivos(int ativo, int atual, pessoal ap[], medico bp[]){
     pessoal *a; //declaro a variavel 
     medico *b; 
     int grave=1,atencao=1,estavel=1; 
@@ -321,6 +326,7 @@ void atenderAtivos(int ativo, int atual, pessoal ap[], medico bp[]){
                     chamadaPaciente(a->nome,b->nivel); 
                     a->ativo=0;
                     achou=1; 
+                    ativo--; //diminuindo o numero de pacientes ativos 
                     break; //sair do loop de procura 
                 }
             cont++;  //vai aumentar no mesmo jeito q o grave,atenção e estavel no primeiro loop 
@@ -331,8 +337,8 @@ void atenderAtivos(int ativo, int atual, pessoal ap[], medico bp[]){
             puts(""); 
         }
         enter(); 
-    }
-    return; 
+    } 
+    return ativo; 
 }
 
 void chamadaPaciente(char nome[], int nivel){
@@ -347,7 +353,7 @@ void chamadaPaciente(char nome[], int nivel){
             Beep(750,500); //chamada de som
             Sleep(100); 
             Beep(550,800);
-            Sleep(3000); 
+            Sleep(1500); 
         }
     }else if(nivel==2){
         for(i=0;i<3;i++){
@@ -356,10 +362,10 @@ void chamadaPaciente(char nome[], int nivel){
             printf("ATENÇÃO\n"); 
             cor(07);
             printf(">>%s<<\n",nome);
-            Beep(750,500); //chamada de som
+            Beep(750,500); //chamada de som //usando a biblioteca windows.h 
             Sleep(100); 
             Beep(550,800); 
-            Sleep(3000); 
+            Sleep(1500); 
         }
     }else{
         for(i=0;i<3;i++){
@@ -368,12 +374,65 @@ void chamadaPaciente(char nome[], int nivel){
             printf("GRAVE\n"); 
             cor(07);
             printf(">>%s<<\n",nome);
-            Beep(750,500); //chamada de som
+            Beep(750,500); //chamada de som 
             Sleep(100); 
             Beep(550,800); 
-            Sleep(3000); 
+            Sleep(1500); 
         }
     }
     return; 
 }
 
+void historicoPacientes(int atual,pessoal pacientes[], medico paciente[]){
+    int i; 
+    pessoal *a; 
+    medico *b; 
+    system("cls"); 
+    puts("HISTÓRICO DE PACIENTES");
+    if(atual==0){
+        puts("Nenhum paciente registrado!");
+    }else{
+        for(i=0;i<atual;i++){
+            a=&pacientes[i]; 
+            b=&paciente[i]; 
+            printf("Nº%d\n",i+1);
+            printf("Nome: %s\n",a->nome); 
+            printf("CPF: %s\n",a->cpf);
+            printf("Sintomas: %s\n",b->sintomas);
+            puts("+-----------------------------------+"); 
+        }
+    }
+    puts(""); 
+    enter(); 
+    return; 
+}
+
+void exportarHistorico(int atual,pessoal pacientes[], medico paciente[]){
+    FILE *f; //ponteiro que vai manipular o arquivo 
+    pessoal *a;
+    medico *b;
+    int i; 
+    system("cls"); 
+    if(atual==0){
+        puts("Nenhum paciente registrado!");
+        puts("Arquivo não criado.");
+        puts("");
+    }else{
+        f= fopen("Histórico dos Pacientes.txt","w"); //o ponteiro abriu o arquivo para manipular
+        fprintf(f,"HISTÓRICO DE PACIENTES\n"); 
+        for(i=0;i<atual;i++){
+            a=&pacientes[i]; //arrumando para o ponteiro pegar o paciente certo
+            b=&paciente[i]; 
+            fprintf(f,"Nº%d\n",i+1);
+            fprintf(f,"Nome: %s\n",a->nome);
+            fprintf(f,"CPF: %s\n",a->cpf);
+            fprintf(f,"Sintomas: %s\n",b->sintomas);
+            fprintf(f,"+--------------------------------+\n");
+        }
+        fclose(f); 
+        puts("Arquivo criado!"); 
+        puts("");
+    }
+    enter(); 
+    return;
+}
