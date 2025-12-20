@@ -25,6 +25,7 @@ typedef struct dados_pessoais{
     char cpf[15]; 
     char telefone[tam];    
     endereco localizacao; 
+    int ativo; // =0 não ativo , =1 ativo , para aparecer na lista ativa 
 }pessoal; 
 
 typedef struct dados_medicos{
@@ -40,6 +41,7 @@ void preencherEndereco(endereco *end);
 void enter(); 
 void cor(int cor_letra); 
 void saudePaciente(int atual,pessoal pacientes[], medico paciente[]); 
+void listarAtivos(int ativo, int atual, pessoal ap[], medico bp[]); 
 
 int main(){
     setlocale(LC_ALL,"portuguese"); 
@@ -52,7 +54,7 @@ void menu(){
     char esc; //escolha de opções no menu 
     int pacientesR=0; //contador de pacientes registrados
     int pacientesA=0; //contador de pacientes ativos   
-    pessoal pacientes[pessoa];
+    pessoal pacientes[pessoa]={0};
     medico prontuario[pessoa]={0}; //zerando tudo da struct
     do{
         while(!kbhit()){ //esquema do relogio e data , e o loop roda enquanto nenhuma tecla for teclada
@@ -100,7 +102,7 @@ void menu(){
             break; 
             case '3':
             break;
-            case '4':
+            case '4':   listarAtivos(pacientesA,pacientesR,pacientes,prontuario); 
             break;
             case '5':
             break; 
@@ -120,6 +122,7 @@ void cor(int cor_letra){
 int cadastroPaciente(int atual,pessoal pacientes[],int *pA){ //quando fizer vetor de struct , declare um ponteiro para manipular 
     pessoal *p=&pacientes[atual]; //um ponteiro que pegou o endereço do paciente na posição 'atual' e vai manipular , indicando onde vai cada parte da struct
     // o ponteiro pega a variavel pacientes atual e manipula ele 
+    p->ativo=1; 
     system("cls"); 
     printf("=========================\n");
     printf("        CADASTRO         \n");
@@ -236,5 +239,70 @@ void saudePaciente(int atual,pessoal pacientes[], medico paciente[]){
             enter();
         }
     }
-        return; 
+    return; 
+}
+
+void listarAtivos(int ativo, int atual, pessoal ap[], medico bp[]){
+    pessoal *a; //declaro a variavel 
+    medico *b; 
+    int grave=1,atencao=1,estavel=1; 
+    int i; 
+    system("cls"); 
+    if(atual==0){
+        puts("Nenhum paciente ativo!"); 
+        enter();
+    }else{
+        printf("TOTAL DE ATIVOS: %d\n",ativo); 
+        puts("");
+        cor(12); 
+        puts("GRAVE");
+        cor(7);
+        for(i=0;i<atual;i++){ //analisar os pacientes graves 
+            a=&ap[i]; //apontando o endereço pros ponteiros indicando oq eles vao mexer/mostrar o conteudo 
+            b=&bp[i]; 
+            if(a->ativo==1 && b->nivel==3){
+                printf("Nº%d\n",grave); 
+                printf("Nome: %s\n",a->nome);
+                printf("CPF: %s\n",a->cpf); 
+                printf("Sintomas: %s\n",b->sintomas); 
+                puts("+---------------------------+");
+                grave++; 
+            }
+        }
+        puts("");
+        cor(14);
+        puts("ATENÇÃO"); 
+        cor(7); 
+        for(i=0;i<atual;i++){ //analisar os pacientes em atenção
+            a=&ap[i]; //apontando o endereço pros ponteiros indicando oq eles vao mexer
+            b=&bp[i];
+            if(a->ativo==1 && b->nivel==2){
+                printf("Nº%d\n",atencao); 
+                printf("Nome: %s\n",a->nome);
+                printf("CPF: %s\n",a->cpf); 
+                printf("Sintomas: %s\n",b->sintomas); 
+                puts("+---------------------------+");
+                atencao++; 
+            }
+        }
+        puts(""); 
+        cor(10);
+        puts("ESTÁVEL"); 
+        cor(7);
+        for(i=0;i<atual;i++){ //analisar os pacientes estaveis 
+            a=&ap[i]; //apontando o endereço pros ponteiros indicando oq eles vao mexer
+            b=&bp[i];
+            if(a->ativo==1 && b->nivel==1){
+                printf("Nº%d\n",estavel); 
+                printf("Nome: %s\n",a->nome);
+                printf("CPF: %s\n",a->cpf); 
+                printf("Sintomas: %s\n",b->sintomas); 
+                puts("+---------------------------+");
+                estavel++; 
+            }
+        }
+        puts("");
+        enter(); 
+    }
+    return; 
 }
